@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import React, {useState} from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/form"
 import FormInput from "@/components/ui/FormInput"
 import Image from 'next/image'
+import { Loader2 } from 'lucide-react';
  
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -17,6 +19,7 @@ const formSchema = z.object({
 
 const AuthForm = ({type}:{type:string}) => {
   const [user,setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -27,7 +30,9 @@ const AuthForm = ({type}:{type:string}) => {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    setIsLoading(true);
+    console.log(values);
+    setIsLoading(false);
   }
 
   return (
@@ -38,20 +43,20 @@ const AuthForm = ({type}:{type:string}) => {
           <div className="flex items-center justify-center gap-3">
             <div className="relative w-12 h-12">
               <Image
-                src="/icons/credit-card.svg" // Path relative to your AuthForm.tsx location
+                src="/icons/credit-card.svg"
                 alt="Bank Logo"
                 width={48}
                 height={48}
                 className="object-contain"
               />
             </div>
-            <h2 className="text-28 lg:text-36 font-bold text-gray-900">
+            <h2 className="text-24 lg:text-36 font-semibold text-gray-900">
               NU Bank
             </h2>
           </div>
           
           <div className='flex flex-col gap-1 md:gap-3'>
-            <h1 className='text-24 lg:text-36 font-semibold text-gray-900 text-center'>
+            <h1 className='text-24 lg:text-36 font-semibold text-gray-900 text-left'>
               {user
                 ? 'Link Account'
                 : type === 'sign-in'
@@ -60,7 +65,7 @@ const AuthForm = ({type}:{type:string}) => {
               }
             </h1>
 
-            <p className='text-16 font-normal text-gray-600 text-center'>
+            <p className='text-14 font-normal text-gray-600 text-left'>
               {user
                 ? 'Link your existing account.'
                 : 'Please enter your details.'
@@ -93,16 +98,45 @@ const AuthForm = ({type}:{type:string}) => {
                 name="password"
                 label="Password"
                 placeholder="Enter your password"
-                type="password" // Add this back for password field
+                type="password"
               />
 
               <div className="h-4"></div>
 
-              <Button type="submit" className="w-full">
-                {type === 'sign-in' ? 'Sign In' : 'Sign Up'}
-              </Button>
+              <div className="flex flex-col gap-4">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}  // Fixed: removed space before =
+                  className="form-btn"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" /> &nbsp;
+                      Loading...
+                    </>
+                  ) : type === 'sign-in' 
+                    ? 'Sign In' 
+                    : 'Sign Up'
+                  }
+                </Button>
+              </div>
             </form>
           </Form>
+          
+          <footer className="flex justify-center gap-1 mt-6">
+            <p className='text-14 font-normal text-gray-600'>
+              {type === 'sign-in'  
+                ? "Don't have an account?"
+                : "Already have an account"
+              } 
+            </p>
+            <Link 
+              href={type === 'sign-in' ? '/sign-up' : '/sign-in'} 
+              className="form-link"
+            >
+              {type === 'sign-in' ? 'Sign Up' : 'Sign In'}
+            </Link>
+          </footer>
         </>
       )}
     </section>
