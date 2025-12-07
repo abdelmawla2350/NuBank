@@ -42,7 +42,7 @@ const FormInput = ({
               <Input
                 placeholder={placeholder || `Enter your ${label.toLowerCase()}`}
                 className='input-class'
-                type={type}
+                type={name==='password' ? 'password' : 'text'}
                 {...field}
               />
             </FormControl>
