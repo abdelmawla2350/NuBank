@@ -1,5 +1,10 @@
 'use server';
 
+import { ID } from "node-appwrite";
+import { createAdminClient, createSessionClient } from "../appwrite";
+import { cookies } from "next/headers";
+import { parseStringify } from "../utils";
+
 export const signIn =async() =>{
     try{
         //Mutation/Database/Make fetch
@@ -11,12 +16,34 @@ export const signIn =async() =>{
 }
 
 
-export const signUp =async(userData: SignUpParams) =>{
-    try{
-        //create user account
-    }
-    catch(error){
-        console.error("Error",error);
-    }
-    
-}
+export const signUp = async (userData: SignUpParams) => {
+  const { email, password, firstName, lastName } = userData;
+
+  try {
+    const { account } = await createAdminClient();
+
+    const newUserAccount = await account.create({
+      userId: ID.unique(),
+      email,
+      password,
+    });
+
+    const session = await account.createEmailPasswordSession({
+      email,
+      password,
+    });
+
+    // FIX: cookies() must be awaited and then set()
+    const cookieStore = await cookies();
+    cookieStore.set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return parseStringify(newUserAccount);
+  } catch (error) {
+    console.error("Error", error);
+  }
+};

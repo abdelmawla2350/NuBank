@@ -16,14 +16,14 @@ import { signIn, signUp } from '@/lib/actions/user.actions';
 const formSchema = (type:string)=> z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  firstName: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
-  lastName: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
-  address: type==="sign-in" ? z.string().optional().nullable() : z.string().max(50),
-  state: type==="sign-in" ? z.string().optional().nullable() : z.string().optional(),
-  city: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
-  postalCode: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
-  dateOfBirth: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
-  ssn: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3),
+  firstName: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3 , { message: "First name must be at least 3 characters" }),
+  lastName: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3 , { message: "Last name must be at least 3 characters" }),
+  address: type==="sign-in" ? z.string().optional().nullable() : z.string().max(50, { message: "Address must be at most 50 characters" }),
+  state: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "State must be at least 3 characters" }),
+  city: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "City must be at least 3 characters" }),
+  postalCode: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "Postal code must be at least 3 characters" }),
+  dateOfBirth: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "Date of birth must be at least 3 characters" }),
+  ssn: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "SSN must be at least 3 characters" }),
 })
 
 const AuthForm = ({type}:{type:string}) => {
