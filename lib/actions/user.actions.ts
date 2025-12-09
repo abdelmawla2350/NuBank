@@ -47,3 +47,4 @@ export const signUp = async (userData: SignUpParams) => {
     console.error("Error", error);
   }
 };
+
