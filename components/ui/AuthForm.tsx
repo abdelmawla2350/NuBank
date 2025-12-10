@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import React, {use, useState} from 'react'
+import React, {use, useEffect, useState} from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -10,7 +10,7 @@ import FormInput from "@/components/ui/FormInput"
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn, signUp } from '@/lib/actions/user.actions';
+import {  getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 
 const formSchema = (type:string)=> z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -21,7 +21,7 @@ const formSchema = (type:string)=> z.object({
   state: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "State must be at least 3 characters" }),
   city: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "City must be at least 3 characters" }),
   postalCode: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "Postal code must be at least 3 characters" }),
-  dateOfBirth: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "Date of birth must be at least 3 characters" }),
+  dateOfBirth: type==="sign-in" ? z.string().optional().nullable() : z.string().min(6, { message: "Date of birth must be at least 6 characters" }),
   ssn: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "SSN must be at least 3 characters" }),
 })
 
@@ -29,6 +29,15 @@ const AuthForm = ({type}:{type:string}) => {
   const router=useRouter();
   const [user,setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+ const [loggedInUser, setLoggedInUser] = useState<any>(null);
+
+useEffect(() => {
+  const fetchUser = async () => {
+    const user = await getLoggedInUser();
+    setLoggedInUser(user);
+  };
+  fetchUser();
+}, []);
 
   // ✅ FIXED resolver + type inference
   const form = useForm<z.infer<ReturnType<typeof formSchema>>>({
@@ -53,24 +62,24 @@ const AuthForm = ({type}:{type:string}) => {
 ,
   });
 
-  const onSubmit = async (values: z.infer<ReturnType<typeof formSchema>>) => {
+  
+
+
+const onSubmit = async (values: z.infer<ReturnType<typeof formSchema>>) => {
   setIsLoading(true);
   try {
+    let response;
 
     if (type === 'sign-up') {
       const newUser = await signUp(values);
       setUser(newUser);
+      response = newUser; // ✅ assign so redirect runs
     }
 
-    if (type === 'sign-in') {
-      // const response = await signIn({
-      //   email: values.email,
-      //   password: values.password,
-      // });
-    }
-
-    // if (response) router.push('/');
-
+if (type === 'sign-in') {
+  const response = await signIn({ email: values.email, password: values.password });
+  if (response) router.push('/');
+}
   } catch (error) {
     console.log(error);
   } finally {
