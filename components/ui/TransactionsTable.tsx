@@ -78,7 +78,7 @@ const TransactionsTable = ({ transactions }: TransactionTableProps) => {
               </TableCell>
 
               <TableCell className="pl-2 pr-10 max-md:hidden">
-               <CategoryBadge category={t.category} /> 
+               {t.category}
               </TableCell>
             </TableRow>
           )
