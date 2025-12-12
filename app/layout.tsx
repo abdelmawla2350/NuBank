@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "NU Bank",
   description: "NU Bank is a modern banking platform for everyone.",
   icons: {
-    icon: "/icons/logo.svg",
+    icon: "/icons/credit-card.svg",
   },
 };
 
