@@ -2,8 +2,9 @@
 
 import { ID, Query } from "node-appwrite";
 
-import { createAdminClient } from "../../../bankify/lib/appwrite.config";
-import { parseStringify } from "../../../bankify/lib/utils";
+
+import { createAdminClient } from "../appwrite";
+import { parseStringify } from "../utils";
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,

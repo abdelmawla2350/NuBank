@@ -9,7 +9,9 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import FormInput from "@/components/ui/FormInput"
-import PlaidLink from "@/components/ui/PlaidLink"
+
+
+import { PlaidLink } from "@/components/PlaidLink"
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -28,9 +30,10 @@ const formSchema = (type:string)=> z.object({
   ssn: type==="sign-in" ? z.string().optional().nullable() : z.string().min(3, { message: "SSN must be at least 3 characters" }),
 })
 
+
 const AuthForm = ({type}:{type:string}) => {
   const router=useRouter();
-  const [user,setUser] = useState(null);
+  const [user,setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
  const [loggedInUser, setLoggedInUser] = useState<any>(null);
 
@@ -123,11 +126,13 @@ const onSubmit = async (values: z.infer<ReturnType<typeof formSchema>>) => {
         </div>
       </header>
 
-      {/*user ? ( */}
+
+
+      {user ? (
         <div className='flex flex-col gap-4'>
-          <PlaidLink user = { user } variant="primary" />
+          <PlaidLink user={user} variant="primary" />
         </div>
-      {/* ) : ( */}
+      ) : (
         <>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -248,8 +253,9 @@ const onSubmit = async (values: z.infer<ReturnType<typeof formSchema>>) => {
               {type === 'sign-in' ? 'Sign Up' : 'Sign In'}
             </Link>
           </footer>
+
         </>
-      {/* )} */}
+      )}
     </section>
   )
 }
