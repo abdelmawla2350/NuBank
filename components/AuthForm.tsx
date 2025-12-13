@@ -1,12 +1,15 @@
 "use client";
 import Link from 'next/link';
-import React, {use, useEffect, useState} from 'react'
+
+import React, { useEffect, useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import FormInput from "@/components/ui/FormInput"
+import PlaidLink from "@/components/ui/PlaidLink"
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -39,7 +42,7 @@ useEffect(() => {
   fetchUser();
 }, []);
 
-  // ✅ FIXED resolver + type inference
+  
   const form = useForm<z.infer<ReturnType<typeof formSchema>>>({
     resolver: zodResolver(formSchema(type)),
     defaultValues: type === "sign-in" 
@@ -65,21 +68,17 @@ useEffect(() => {
   
 
 
+
 const onSubmit = async (values: z.infer<ReturnType<typeof formSchema>>) => {
   setIsLoading(true);
   try {
-    let response;
-
     if (type === 'sign-up') {
       const newUser = await signUp(values);
       setUser(newUser);
-      response = newUser; // ✅ assign so redirect runs
+    } else if (type === 'sign-in') {
+      const response = await signIn({ email: values.email, password: values.password });
+      if (response) router.push('/');
     }
-
-if (type === 'sign-in') {
-  const response = await signIn({ email: values.email, password: values.password });
-  if (response) router.push('/');
-}
   } catch (error) {
     console.log(error);
   } finally {
@@ -124,11 +123,11 @@ if (type === 'sign-in') {
         </div>
       </header>
 
-      {user ? (
+      {/*user ? ( */}
         <div className='flex flex-col gap-4'>
-          {/* plaid link component */}
+          <PlaidLink user = { user } variant="primary" />
         </div>
-      ) : (
+      {/* ) : ( */}
         <>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -250,7 +249,7 @@ if (type === 'sign-in') {
             </Link>
           </footer>
         </>
-      )}
+      {/* )} */}
     </section>
   )
 }
