@@ -3,18 +3,21 @@ import TotalBalanceBox from "@/components/ui/TotalBalanceBox";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { get } from "http";
 import react from "react";
+import RightSidebar from "@/components/ui/RightSidebar";
 
-const Home = async() => {
-  const loggedIn = await getLoggedInUser();
+
+
+const Home = () => {
+  const loggedIn = {firstName: 'Malak', lastName: 'Mohamed',email:'contact@jsmastery.pro'} ;
   return (
     <section className="home">
       <div className="home-content">
         <header className="home-header">
           <HeaderBox
           type="greeting"
-          title="Welcome,"
-          user={loggedIn?.name || "Customer"}
-          subtext="Access and manage your account and transactions efficiently."
+          title="Welcome to NU Bank,"
+          user={loggedIn?.firstName || "Customer"}
+          subtext="Your modern banking platform for everyone."
           />
 
           <TotalBalanceBox
@@ -24,10 +27,16 @@ const Home = async() => {
           />
 
         </header>
+        RECENT TRANSACTIONS
       </div>
-
+<RightSidebar user={loggedIn}
+transactions={[]}
+banks={[{currentBalance:123.50},{currentBalance:123.50}]}
+ />
     </section>
   );
 };
 
 export default Home;
+
+    
