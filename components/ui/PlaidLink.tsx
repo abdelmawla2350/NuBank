@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './button'
 import { PlaidLinkOnSuccess, PlaidLinkOptions, usePlaidLink } from 'react-plaid-link'
 import { useRouter } from 'next/navigation';
-// import { createLinkToken, exchangePublicToken } from '@/lib/actions/user.actions';
+import { createLinkToken, exchangePublicToken } from '@/lib/actions/user.actions';
 import Image from 'next/image';
 
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
@@ -13,24 +13,24 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
     if (!user) return; // Prevent API call if user is not loaded yet
 
     const getLinkToken = async () => {
-      // try {
-      //   const data = await createLinkToken(user);
-      //   setToken(data?.linkToken || '');
-      // } catch (err) {
-      //   console.error("Error creating link token:", err);
-      // }
+      try {
+        const data = await createLinkToken(user);
+        setToken(data?.linkToken || '');
+      } catch (err) {
+        console.error("Error creating link token:", err);
+      }
     };
 
     getLinkToken();
   }, [user]);
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
-    // try {
-    //   await exchangePublicToken({ publicToken: public_token, user });
-    //   router.push('/');
-    // } catch (err) {
-    //   console.error("Error exchanging token:", err);
-    // }
+    try {
+      await exchangePublicToken({ publicToken: public_token, user });
+      router.push('/');
+    } catch (err) {
+      console.error("Error exchanging token:", err);
+    }
   }, [user, router]);
 
   if (!token) return null; 
