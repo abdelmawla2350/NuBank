@@ -211,15 +211,17 @@ declare interface TotlaBalanceBoxProps {
 
 declare interface FooterProps {
   user: User;
+  type?:"mobile"|"desktop"
 }
 
 declare interface RightSidebarProps {
   user: User;
   transactions: Transaction[];
-  banks: Bank[] & Account[];
+  banks: (Bank & Account)[];
 }
 
-declare interface SiderbarProps {
+
+declare interface SidebarProps {
   user: User;
 }
 
@@ -327,3 +329,6 @@ declare interface getBankProps {
 declare interface getBankByAccountIdProps {
   accountId: string;
 }
+
+
+
