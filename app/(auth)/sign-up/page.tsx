@@ -1,4 +1,5 @@
-import AuthForm from "@/components/ui/AuthForm";
+
+import AuthForm from "@/components/AuthForm";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import react from "react";
 
