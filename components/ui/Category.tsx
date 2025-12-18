@@ -3,7 +3,7 @@ import Image from "next/image";
 import { topCategoryStyles } from "@/constants";
 import { cn } from "@/lib/utils";
 
-import  Progress  from "./progress";
+import  {Progress}  from "./progress";
 <Progress value={60} className="w-full" indicatorClassName="rounded-md" />
 const Category = ({ category }: CategoryProps) => {
   const {

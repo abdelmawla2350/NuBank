@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { BankDropdown } from "@/components/bank/BankDropdown";
-import { HeaderBox } from "@/components/common";
+import { HeaderBox } from "@/components/ui/common";
 import TransactionHistoryTable from "@/components/transaction/TransactionHistoryTable";
 import { getAccount, getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";

@@ -1,7 +1,7 @@
 import { cn, formatAmount } from "@/lib/utils";
 
-import AnimatedCounter from "../AnimatedCounter";
-import DoughnutChart from "../DoughnutChart";
+import AnimatedCounter from "./AnimatedCounter";
+import DoughnutChart from "./DoughnutChart";
 
 export const HeaderBox = ({
   type = "title",
@@ -69,7 +69,7 @@ export const TotalBalanceBox = ({
           <p className="total-balance-label">Total Current Balance</p>
 
           <p className="total-balance-amount flex-center gap-2">
-            $<AnimatedCounter amount={formatAmount(totalCurrentBalance)} />
+            {/* $<AnimatedCounter amount={formatAmount(totalCurrentBalance)} /> */}
           </p>
         </div>
       </div>

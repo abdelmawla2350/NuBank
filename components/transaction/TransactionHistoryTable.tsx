@@ -1,6 +1,6 @@
 "use client";
 
-import { Pagination } from "../Pagination";
+import { Pagination } from "../ui/Pagination";
 
 import TransactionTable from "./TransactionTable";
 

@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@/components/ui/common";
 import PaymentTransferForm from "@/components/PaymentTransferForm";
 import { getAccounts } from "@/lib/actions/bank.actions";
 import { getLoggedInUser } from "@/lib/actions/user.actions";

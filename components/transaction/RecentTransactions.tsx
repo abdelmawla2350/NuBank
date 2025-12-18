@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import BankInfo from "../bank/BankInfo";
 import { BankTabItem } from "../bank/BankTabItem";
-import { Pagination } from "../Pagination";
+import { Pagination } from "../ui/Pagination";
 
 import TransactionTable from "./TransactionTable";
 
