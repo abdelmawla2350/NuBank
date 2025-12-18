@@ -197,17 +197,46 @@ export const getTransactionStatus = (date: Date) => {
 
   return date > twoDaysAgo ? "Processing" : "Success";
 };
-export const authFormSchema = (type: string) => z.object({
-  // sign up
-  firstName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  lastName: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  address1: type === 'sign-in' ? z.string().optional() : z.string().max(50),
-  city: type === 'sign-in' ? z.string().optional() : z.string().max(50),
-  state: type === 'sign-in' ? z.string().optional() : z.string().min(2).max(2),
-  postalCode: type === 'sign-in' ? z.string().optional() : z.string().min(3).max(6),
-  dateOfBirth: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  ssn: type === 'sign-in' ? z.string().optional() : z.string().min(3),
-  // both
-  email: z.string().email(),
-  password: z.string().min(8),
-})
+export const authFormSchema = (type: string) =>
+  z.object({
+    // sign up only
+    firstName:
+      type === "sign-in" ? z.string().optional() : z.string().min(2),
+
+    lastName:
+      type === "sign-in" ? z.string().optional() : z.string().min(2),
+
+    address1:
+      type === "sign-in" ? z.string().optional() : z.string().min(5).max(50),
+
+    city:
+      type === "sign-in" ? z.string().optional() : z.string().min(2).max(50),
+
+    // MUST be 2-letter US state code
+    state:
+      type === "sign-in"
+        ? z.string().optional()
+        : z.string().length(2).toUpperCase(),
+
+    // US ZIP (5 digits or ZIP+4)
+    postalCode:
+      type === "sign-in"
+        ? z.string().optional()
+        : z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
+
+    // YYYY-MM-DD
+    dateOfBirth:
+      type === "sign-in"
+        ? z.string().optional()
+        : z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid DOB format"),
+
+    // LAST 4 digits only
+    ssn:
+      type === "sign-in"
+        ? z.string().optional()
+        : z.string().regex(/^\d{4}$/, "SSN must be last 4 digits"),
+
+    // both
+    email: z.string().email(),
+    password: z.string().min(8),
+  });

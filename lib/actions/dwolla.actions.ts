@@ -2,113 +2,132 @@
 
 import { Client } from "dwolla-v2";
 
+/* ---------------------------------------------
+   ENVIRONMENT
+--------------------------------------------- */
 const getEnvironment = (): "production" | "sandbox" => {
-  const environment = process.env.DWOLLA_ENV as string;
+  const environment = process.env.DWOLLA_ENV;
 
-  switch (environment) {
-    case "sandbox":
-      return "sandbox";
-    case "production":
-      return "production";
-    default:
-      throw new Error(
-        "Dwolla environment should either be set to `sandbox` or `production`"
-      );
-  }
+  if (environment === "sandbox") return "sandbox";
+  if (environment === "production") return "production";
+
+  throw new Error(
+    "DWOLLA_ENV must be set to either 'sandbox' or 'production'"
+  );
 };
 
+/* ---------------------------------------------
+   CLIENT
+--------------------------------------------- */
 const dwollaClient = new Client({
   environment: getEnvironment(),
   key: process.env.DWOLLA_KEY as string,
   secret: process.env.DWOLLA_SECRET as string,
 });
 
-// Create a Dwolla Funding Source using a Plaid Processor Token
-export const createFundingSource = async (
-  options: CreateFundingSourceOptions
-) => {
-  try {
-    return await dwollaClient
-      .post(`customers/${options.customerId}/funding-sources`, {
-        name: options.fundingSourceName,
-        plaidToken: options.plaidToken,
-      })
-      .then((res) => res.headers.get("location"));
-  } catch (err) {
-    console.error("Creating a Funding Source Failed: ", err);
-  }
-};
-
-export const createOnDemandAuthorization = async () => {
-  try {
-    const onDemandAuthorization = await dwollaClient.post(
-      "on-demand-authorizations"
-    );
-    const authLink = onDemandAuthorization.body._links;
-    return authLink;
-  } catch (err) {
-    console.error("Creating an On Demand Authorization Failed: ", err);
-  }
-};
-
+/* ---------------------------------------------
+   CREATE CUSTOMER
+--------------------------------------------- */
 export const createDwollaCustomer = async (
   newCustomer: NewDwollaCustomerParams
 ) => {
   try {
-    return await dwollaClient
-      .post("customers", newCustomer)
-      .then((res) => res.headers.get("location"));
-  } catch (err) {
-    console.error("Creating a Dwolla Customer Failed: ", err);
+    const res = await dwollaClient.post("customers", newCustomer);
+    return res.headers.get("location");
+  } catch (err: any) {
+    console.error("❌ DWOLLA CUSTOMER CREATION FAILED");
+    console.error("Status:", err?.status);
+    console.error("Body:", JSON.stringify(err?.body, null, 2));
+    throw err;
   }
 };
 
-export const createTransfer = async ({
-  sourceFundingSourceUrl,
-  destinationFundingSourceUrl,
-  amount,
-}: TransferParams) => {
+/* ---------------------------------------------
+   ON-DEMAND AUTHORIZATION
+--------------------------------------------- */
+export const createOnDemandAuthorization = async () => {
   try {
-    const requestBody = {
-      _links: {
-        source: {
-          href: sourceFundingSourceUrl,
-        },
-        destination: {
-          href: destinationFundingSourceUrl,
-        },
-      },
-      amount: {
-        currency: "USD",
-        value: amount,
-      },
-    };
-    return await dwollaClient
-      .post("transfers", requestBody)
-      .then((res) => res.headers.get("location"));
-  } catch (err) {
-    console.error("Transfer fund failed: ", err);
+    const res = await dwollaClient.post("on-demand-authorizations");
+    return res.body._links;
+  } catch (err: any) {
+    console.error("❌ ON-DEMAND AUTH FAILED");
+    console.error("Body:", JSON.stringify(err?.body, null, 2));
+    throw err;
   }
 };
 
+/* ---------------------------------------------
+   FUNDING SOURCE (PLAID)
+--------------------------------------------- */
+export const createFundingSource = async (
+  options: CreateFundingSourceOptions
+) => {
+  try {
+    const res = await dwollaClient.post(
+      `customers/${options.customerId}/funding-sources`,
+      {
+        name: options.fundingSourceName,
+        plaidToken: options.plaidToken,
+        _links: options._links,
+      }
+    );
+
+    return res.headers.get("location");
+  } catch (err: any) {
+    console.error("❌ FUNDING SOURCE CREATION FAILED");
+    console.error("Body:", JSON.stringify(err?.body, null, 2));
+    throw err;
+  }
+};
+
+/* ---------------------------------------------
+   ADD FUNDING SOURCE (WRAPPER)
+--------------------------------------------- */
 export const addFundingSource = async ({
   dwollaCustomerId,
   processorToken,
   bankName,
 }: AddFundingSourceParams) => {
   try {
-    // create dwolla auth link
-    const dwollaAuthLinks = await createOnDemandAuthorization();
+    const authLinks = await createOnDemandAuthorization();
 
-    // add funding source to the dwolla customer & get the funding source url
-    const fundingSourceOptions = {
+    return await createFundingSource({
       customerId: dwollaCustomerId,
       fundingSourceName: bankName,
       plaidToken: processorToken,
-      _links: dwollaAuthLinks,
-    };
-    return await createFundingSource(fundingSourceOptions);
+      _links: authLinks,
+    });
   } catch (err) {
-    console.error("Transfer fund failed: ", err);
+    console.error("❌ ADD FUNDING SOURCE FAILED");
+    throw err;
+  }
+};
+
+/* ---------------------------------------------
+   TRANSFER
+--------------------------------------------- */
+export const createTransfer = async ({
+  sourceFundingSourceUrl,
+  destinationFundingSourceUrl,
+  amount,
+}: TransferParams) => {
+  try {
+    const body = {
+      _links: {
+        source: { href: sourceFundingSourceUrl },
+        destination: { href: destinationFundingSourceUrl },
+      },
+      amount: {
+        currency: "USD",
+        value: amount,
+      },
+    };
+
+    const res = await dwollaClient.post("transfers", body);
+    return res.headers.get("location");
+  } catch (err: any) {
+    console.error("❌ TRANSFER FAILED");
+    console.error("Body:", JSON.stringify(err?.body, null, 2));
+    throw err;
   }
 };
