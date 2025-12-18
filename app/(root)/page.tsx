@@ -1,101 +1,57 @@
-import HeaderBox from "@/components/ui/HeaderBox";
-import TotalBalanceBox from "@/components/ui/TotalBalanceBox";
-import RightSidebar from "@/components/ui/RightSidebar";
+import { redirect } from "next/navigation";
 
-// Dummy user matching your User type (add required fields as needed)
-const loggedInUser = {
-  $id: "user123",
-  email: "contact@jsmastery.pro",
-  userId: "user123",
-  dwollaCustomerUrl: "",
-  dwollaCustomerId: "",
-  firstName: "Malak",
-  lastName: "Mohamed",
-  name: "Malak Mohamed",
-  address1: "123 Street",
-  city: "Cairo",
-  state: "Cairo",
-  postalCode: "12345",
-  dateOfBirth: "1990-01-01",
-  ssn: "123-45-6789",
-};
+import { HeaderBox, TotalBalanceBox } from "@/components/ui/common";
+import { RightSidebar } from "@/components/nav/RightSidebar";
+import { RecentTransactions } from "@/components/transaction/RecentTransactions";
+import { getAccount, getAccounts } from "@/lib/actions/bank.actions";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
 
-// Dummy merged Bank & Account data
-const dummyBankAccounts = [
-  {
-    // Bank props
-    $id: "bank1",
-    accountId: "acc1",
-    bankId: "bankid1",
-    accessToken: "token1",
-    fundingSourceUrl: "https://dummyfundingsource.com/1",
-    userId: "user123",
-    sharableId: "share1",
+const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
+  const currentPage = Number(page as string) || 1;
 
-    // Account props
-    id: "acc1",
-    availableBalance: 120.5,
-    currentBalance: 123.5,
-    officialName: "Chase Bank Checking",
-    mask: "1234",
-    institutionId: "ins_1",
-    name: "Chase",
-    type: "depository",
-    subtype: "checking",
-    appwriteItemId: "appwrite_acc1",
-  },
-  {
-    // Bank props
-    $id: "bank2",
-    accountId: "acc2",
-    bankId: "bankid2",
-    accessToken: "token2",
-    fundingSourceUrl: "https://dummyfundingsource.com/2",
-    userId: "user123",
-    sharableId: "share2",
+  const loggedIn = await getLoggedInUser();
+  if (!loggedIn) redirect("/sign-in");
 
-    // Account props
-    id: "acc2",
-    availableBalance: 450,
-    currentBalance: 456.75,
-    officialName: "Bank of America Savings",
-    mask: "5678",
-    institutionId: "ins_2",
-    name: "BOA",
-    type: "depository",
-    subtype: "savings",
-    appwriteItemId: "appwrite_acc2",
-  },
-];
+  const accounts = await getAccounts({
+    userId: loggedIn?.$id,
+  });
+  if (!accounts) return;
 
-const totalCurrentBalance = dummyBankAccounts.reduce((sum, b) => sum + b.currentBalance, 0);
+  const accountsData = accounts?.data;
+  const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
 
-const Home = () => {
+  const account = await getAccount({ appwriteItemId });
+
   return (
     <section className="home">
       <div className="home-content">
         <header className="home-header">
           <HeaderBox
             type="greeting"
-            title="Welcome to NU Bank,"
-            user={loggedInUser?.firstName || "Customer"}
-            subtext="Your modern banking platform for everyone."
+            title="Welcome"
+            user={loggedIn?.firstName || "Guest"}
+            subtext="Access & manage your account and transactions efficiently."
           />
 
           <TotalBalanceBox
-            accounts={dummyBankAccounts}
-            totalBanks={dummyBankAccounts.length}
-            totalCurrentBalance={totalCurrentBalance}
+            accounts={accountsData}
+            totalBanks={accounts?.totalBanks}
+            totalCurrentBalance={accounts?.totalCurrentBalance}
           />
         </header>
 
-        RECENT TRANSACTIONS
+        <RecentTransactions
+          accounts={accountsData}
+          transactions={account?.transactions}
+          appwriteItemId={appwriteItemId}
+          page={currentPage}
+        />
       </div>
 
       <RightSidebar
-        user={loggedInUser}
-        transactions={[]} // empty for now
-        banks={dummyBankAccounts}
+        user={loggedIn}
+        transactions={account?.transactions}
+        banks={accountsData?.slice(0, 2)}
       />
     </section>
   );

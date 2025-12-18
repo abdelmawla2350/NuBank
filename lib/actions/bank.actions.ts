@@ -19,7 +19,7 @@ import { getBanks, getBank } from "./user.actions";
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
   try {
-    // get banks from db
+    /// get banks from db
     const banks = await getBanks({ userId });
 
     const accounts = await Promise.all(
