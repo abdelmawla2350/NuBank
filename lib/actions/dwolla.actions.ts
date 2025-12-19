@@ -260,3 +260,91 @@ export const createTransfer = async ({
     throw err;
   }
 };
+
+// -----------------------------
+// Diagnostic helpers (read-only)
+// -----------------------------
+export const getTransfer = async (transferLocationOrId: string) => {
+  try {
+    // Accept either a full URL, a relative id/path, or just an id
+    let path = transferLocationOrId;
+
+    if (transferLocationOrId.startsWith("http")) {
+      const url = new URL(transferLocationOrId);
+      path = url.pathname.replace(/^\//, "");
+    }
+
+    // If a bare UUID was provided, build the transfers path
+    const uuidLike = /^[0-9a-fA-F-]{10,}$/;
+    if (!path.includes("/") && uuidLike.test(path)) {
+      path = `transfers/${path}`;
+    }
+
+    // Ensure transfers/ prefix if user passed an id without it
+    if (!path.startsWith("transfers/") && /transfers\//i.test(path) === false && path.match(/^transfers?\//i) === null) {
+      // leave as-is; dwollaClient may accept other paths
+    }
+
+    const res = await dwollaClient.get(path);
+
+    // Normalize headers into a plain object for JSON serialization
+    const headersObj: Record<string, string> = {};
+    try {
+      if (res?.headers && typeof res.headers.forEach === "function") {
+        res.headers.forEach((v: string, k: string) => (headersObj[k] = v));
+      } else if (res?.headers) {
+        // If headers is an object-like map
+        Object.entries(res.headers).forEach(([k, v]) => (headersObj[k] = String(v)));
+      }
+    } catch (hdrErr) {
+      // ignore header parsing errors
+    }
+
+    return {
+      requestedPath: path,
+      status: res?.status ?? null,
+      headers: Object.keys(headersObj).length ? headersObj : null,
+      body: typeof res?.body !== "undefined" ? res.body : null,
+    };
+  } catch (err: any) {
+    console.error("❌ GET TRANSFER FAILED", err?.status, err?.body);
+    throw err;
+  }
+};
+
+export const getFundingSource = async (fundingSourceUrl: string) => {
+  try {
+    let path = fundingSourceUrl;
+    if (fundingSourceUrl.startsWith("http")) {
+      const url = new URL(fundingSourceUrl);
+      path = url.pathname.replace(/^\//, "");
+    }
+
+    // If a bare UUID was provided, assume it's a funding-source id
+    const uuidLike = /^[0-9a-fA-F-]{10,}$/;
+    if (!path.includes("/") && uuidLike.test(path)) {
+      path = `funding-sources/${path}`;
+    }
+
+    const res = await dwollaClient.get(path);
+
+    const headersObj: Record<string, string> = {};
+    try {
+      if (res?.headers && typeof res.headers.forEach === "function") {
+        res.headers.forEach((v: string, k: string) => (headersObj[k] = v));
+      } else if (res?.headers) {
+        Object.entries(res.headers).forEach(([k, v]) => (headersObj[k] = String(v)));
+      }
+    } catch (hdrErr) {}
+
+    return {
+      requestedPath: path,
+      status: res?.status ?? null,
+      headers: Object.keys(headersObj).length ? headersObj : null,
+      body: typeof res?.body !== "undefined" ? res.body : null,
+    };
+  } catch (err: any) {
+    console.error("❌ GET FUNDING SOURCE FAILED", err?.status, err?.body);
+    throw err;
+  }
+};

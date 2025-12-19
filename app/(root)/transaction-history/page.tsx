@@ -1,132 +1,99 @@
-import { redirect } from "next/navigation";
+import HeaderBox from '@/components/HeaderBox'
+import BankSelector from '@/components/BankSelector'
+import { Pagination } from '@/components/Pagination';
+import TransactionsTable from '@/components/TransactionsTable';
+import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
+import { getLoggedInUser } from '@/lib/actions/user.actions';
+import { formatAmount } from '@/lib/utils';
+import React from 'react'
 
-import { BankDropdown } from "@/components/bank/BankDropdown";
-import { HeaderBox } from "@/components/ui/common";
-import TransactionHistoryTable from "@/components/transaction/TransactionHistoryTable";
-import { getAccount, getAccounts } from "@/lib/actions/bank.actions";
-import { getLoggedInUser } from "@/lib/actions/user.actions";
-import { formatAmount } from "@/lib/utils";
-
-type SearchParamProps = {
-  searchParams?: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
-};
-
-const TransactionHistory = async (props: SearchParamProps) => {
-  const { searchParams } = props || {};
-  
-  // Await searchParams before accessing its properties (Next.js 15+ requirement)
-  const params = await searchParams || {};
-
-  const id =
-    params && typeof params.id === "string"
-      ? params.id
-      : Array.isArray(params?.id)
-      ? params.id[0]
-      : undefined;
-
-  const pageStr =
-    params && typeof params.page === "string"
-      ? params.page
-      : undefined;
-
-  const currentPage = pageStr ? Number(pageStr) : 1;
-
+const TransactionHistory = async ({ searchParams: { id, page }}:SearchParamProps) => {
+  const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  if (!loggedIn) redirect("/sign-in");
+  // If the user is not authenticated, show a simple prompt instead of calling protected APIs
+  if (!loggedIn || !loggedIn.$id) {
+    return (
+      <div className="transactions">
+        <div className="transactions-header">
+          <HeaderBox 
+            title="Transaction History"
+            subtext="Sign in to view your bank details and transactions."
+          />
+        </div>
+        <div className="p-6">
+          <p className="text-14 text-white">Please sign in to view transaction history.</p>
+        </div>
+      </div>
+    );
+  }
 
-  const accounts = await getAccounts({
-    userId: loggedIn?.$id,
-  });
+  const accounts = await getAccounts({ userId: loggedIn.$id })
+
+  if(!accounts) return;
   
-  if (!accounts || !accounts.data || accounts.data.length === 0) {
-    return (
-      <section className="transactions">
-        <div className="transactions-header">
-          <HeaderBox
-            title="Transaction History"
-            subtext="See your bank details and transactions."
-          />
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 py-20">
-          <p className="text-16 font-normal text-gray-600">No bank accounts found. Please connect a bank account first.</p>
-        </div>
-      </section>
-    );
+  const accountsData = accounts?.data;
+  const appwriteItemId = (id as string) || accountsData?.[0]?.appwriteItemId;
+
+  let account = null;
+  if (appwriteItemId) {
+    account = await getAccount({ appwriteItemId });
+  } else {
+    console.warn('No appwriteItemId available for getAccount — skipping getAccount call');
   }
 
-  const accountsData = accounts.data;
-  const appwriteItemId = id || accountsData[0]?.appwriteItemId;
 
-  if (!appwriteItemId) {
-    return (
-      <section className="transactions">
-        <div className="transactions-header">
-          <HeaderBox
-            title="Transaction History"
-            subtext="See your bank details and transactions."
-          />
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 py-20">
-          <p className="text-16 font-normal text-gray-600">Unable to load account information.</p>
-        </div>
-      </section>
-    );
-  }
+const rowsPerPage = 10;
+const totalPages = Math.ceil((account?.transactions?.length || 0) / rowsPerPage);
 
-  const account = await getAccount({ appwriteItemId });
+const indexOfLastTransaction = currentPage * rowsPerPage;
+const indexOfFirstTransaction = indexOfLastTransaction - rowsPerPage;
 
-  if (!account || !account.data) {
-    return (
-      <section className="transactions">
-        <div className="transactions-header">
-          <HeaderBox
-            title="Transaction History"
-            subtext="See your bank details and transactions."
-          />
-          {accountsData && accountsData.length > 0 && (
-            <BankDropdown accounts={accountsData} />
-          )}
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 py-20">
-          <p className="text-16 font-normal text-gray-600">Unable to load account details. Please try again.</p>
-        </div>
-      </section>
-    );
-  }
-
+const currentTransactions = (account?.transactions || []).slice(
+  indexOfFirstTransaction, indexOfLastTransaction
+)
   return (
-    <section className="transactions">
+    <div className="transactions">
       <div className="transactions-header">
-        <HeaderBox
+        <HeaderBox 
           title="Transaction History"
           subtext="See your bank details and transactions."
         />
-        <BankDropdown accounts={accountsData} />
       </div>
 
       <div className="space-y-6">
         <div className="transactions-account">
           <div className="flex flex-col gap-2">
             <h2 className="text-18 font-bold text-white">{account?.data.name}</h2>
-            <p className="text-14 text-blue-25">{account?.data.officialName}</p>
-            <p className={`text-14 font-medium text-blue-25`}>
+            <p className="text-14 text-blue-25">
+              {account?.data.officialName}
+            </p>
+            <p className="text-14 font-semibold tracking-[1.1px] text-white">
               ●●●● ●●●● ●●●● {account?.data.mask}
             </p>
           </div>
-          <div className="transactions-account-balance">
-            <p className={`text-14`}>Current Balance</p>
-            <p className={`text-24 text-center font-bold `}>
-              {formatAmount(account?.data.currentBalance)}
-            </p>
+          <div className="ml-auto">
+            <BankSelector accounts={accountsData || []} currentId={appwriteItemId} />
+          </div>
+          
+          <div className='transactions-account-balance'>
+            <p className="text-14">Current balance</p>
+            <p className="text-24 text-center font-bold">{formatAmount(account?.data.currentBalance)}</p>
           </div>
         </div>
 
-        <TransactionHistoryTable page={currentPage} transactions={account?.transactions} />
+        <section className="flex w-full flex-col gap-6">
+          <TransactionsTable 
+            transactions={currentTransactions}
+          />
+            {totalPages > 1 && (
+              <div className="my-4 w-full">
+                <Pagination totalPages={totalPages} page={currentPage} />
+              </div>
+            )}
+        </section>
       </div>
-    </section>
-  );
-};
+    </div>
+  )
+}
 
-export default TransactionHistory;
+export default TransactionHistory

@@ -1,42 +1,40 @@
-import { redirect } from "next/navigation";
+import BankCard from '@/components/BankCard';
+import HeaderBox from '@/components/HeaderBox'
+import { getAccounts } from '@/lib/actions/bank.actions';
+import { getLoggedInUser } from '@/lib/actions/user.actions';
+import React from 'react'
 
-import BankCard from "@/components/bank/BankCard";
-import { HeaderBox } from "@/components/ui/common";
-import { getAccounts } from "@/lib/actions/bank.actions";
-import { getLoggedInUser } from "@/lib/actions/user.actions";
-
-const page = async () => {
+const MyBanks = async () => {
   const loggedIn = await getLoggedInUser();
-  if (!loggedIn) redirect("/sign-in");
-
-  const accounts = await getAccounts({
-    userId: loggedIn?.$id,
-  });
+  const accounts = await getAccounts({ 
+    userId: loggedIn.$id 
+  })
 
   return (
-    <section className="flex">
+    <section className='flex'>
       <div className="my-banks">
-        <HeaderBox
+        <HeaderBox 
           title="My Bank Accounts"
-          subtext="Effortlessly Manage Your Banking Activities"
+          subtext="Effortlessly manage your banking activites."
         />
 
         <div className="space-y-4">
-          <h2 className="header-2">Your cards</h2>
+          <h2 className="header-2">
+            Your cards
+          </h2>
           <div className="flex flex-wrap gap-6">
-            {accounts &&
-              accounts.data.map((account: Account) => (
-                <BankCard
-                  key={account.id}
-                  account={account}
-                  userName={loggedIn?.name}
-                />
-              ))}
+            {accounts && accounts.data.map((a: Account) => (
+              <BankCard 
+                key={accounts.id}
+                account={a}
+                userName={loggedIn?.firstName}
+              />
+            ))}
           </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default page;
+export default MyBanks

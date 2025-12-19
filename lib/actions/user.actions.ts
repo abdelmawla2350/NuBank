@@ -124,6 +124,18 @@ export async function getLoggedInUser() {
   try {
     const { account } = await createSessionClient();
     const user = await account.get();
+    // Try to enrich the Appwrite account with the user document (which contains firstName/lastName)
+    try {
+      const userDoc = await getUserInfo({ userId: user.$id });
+      if (userDoc) {
+        // Merge document fields (firstName, lastName, etc.) with the account object
+        const merged = { ...user, ...userDoc };
+        return parseStringify(merged);
+      }
+    } catch (e) {
+      /* ignore and return account */
+    }
+
     return parseStringify(user);
   } catch (error) {
     return null;
@@ -151,7 +163,7 @@ export const createLinkToken = async (user: User) => {
         client_user_id: user.$id,
       },
       client_name: user.firstName + user.lastName,
-      products: ["auth"] as Products[],
+      products: ["auth", "transactions"] as Products[],
       language: "en",
       country_codes: ["US"] as CountryCode[],
     };
@@ -463,7 +475,6 @@ export const getBank = async ({ documentId }: getBankProps) => {
     return parseStringify(bank);
   } catch (error) {
     console.error("Error fetching bank:", error);
-    return null;
   }
 };
 

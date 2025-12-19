@@ -4,13 +4,13 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: "https://ac976ed41e2dd058c7cc7ef8c107efa7@o4510540167249920.ingest.us.sentry.io/4510540169740288",
-
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
-});
+const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
+if (process.env.NODE_ENV === 'production' && dsn) {
+  Sentry.init({
+    dsn,
+    tracesSampleRate: 1,
+    debug: false,
+  });
+} else {
+  // noop in development
+}

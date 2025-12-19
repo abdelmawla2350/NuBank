@@ -3,9 +3,9 @@ import Image from "next/image";
 import { topCategoryStyles } from "@/constants";
 import { cn } from "@/lib/utils";
 
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "./ui/progress";
 
-export const Category = ({ category }: CategoryProps) => {
+const Category = ({ category }: CategoryProps) => {
   const {
     bg,
     circleBg,
@@ -34,3 +34,5 @@ export const Category = ({ category }: CategoryProps) => {
     </div>
   );
 };
+
+export default Category;

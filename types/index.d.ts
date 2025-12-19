@@ -6,19 +6,19 @@ declare type SearchParamProps = {
 };
 
 // ========================================
+
 declare type SignUpParams = {
-  firstName?: string | null;
-  lastName?: string | null;
-  address1?: string | null;
-  city?: string | null;
-  state?: string | null;
-  postalCode?: string | null;
-  dateOfBirth?: string | null;
-  ssn?: string | null;
+  firstName: string;
+  lastName: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  dateOfBirth: string;
+  ssn: string;
   email: string;
   password: string;
 };
-
 
 declare type LoginUser = {
   email: string;
@@ -60,7 +60,7 @@ declare type Account = {
   type: string;
   subtype: string;
   appwriteItemId: string;
-  sharableId: string;
+  shareableId: string;
 };
 
 declare type Transaction = {
@@ -89,7 +89,7 @@ declare type Bank = {
   accessToken: string;
   fundingSourceUrl: string;
   userId: string;
-  sharableId: string;
+  shareableId: string;
 };
 
 declare type AccountTypes =
@@ -177,16 +177,17 @@ declare interface PlaidLinkProps {
   user: User;
   variant?: "primary" | "ghost";
   dwollaCustomerId?: string;
+  accessToken?: string; // optional existing Plaid access token to support reauthorization/update mode
 }
 
-declare type User = sdk.Models.Document & {
-  accountId: string;
-  email: string;
-  name: string;
-  items: string[];
-  accessToken: string;
-  image: string;
-};
+// declare type User = sdk.Models.Document & {
+//   accountId: string;
+//   email: string;
+//   name: string;
+//   items: string[];
+//   accessToken: string;
+//   image: string;
+// };
 
 declare interface AuthFormProps {
   type: "sign-in" | "sign-up";
@@ -203,7 +204,7 @@ declare interface BankTabItemProps {
   appwriteItemId?: string;
 }
 
-declare interface TotlaBalanceBoxProps {
+declare interface TotalBalanceBoxProps {
   accounts: Account[];
   totalBanks: number;
   totalCurrentBalance: number;
@@ -211,17 +212,16 @@ declare interface TotlaBalanceBoxProps {
 
 declare interface FooterProps {
   user: User;
-  type?:"mobile"|"desktop"
+  type?: 'mobile' | 'desktop'
 }
 
 declare interface RightSidebarProps {
   user: User;
   transactions: Transaction[];
-  banks: (Bank & Account)[];
+  banks: Bank[] & Account[];
 }
 
-
-declare interface SidebarProps {
+declare interface SiderbarProps {
   user: User;
 }
 
@@ -315,7 +315,7 @@ declare interface createBankAccountProps {
   accountId: string;
   bankId: string;
   fundingSourceUrl: string;
-  sharaebleId: string;
+  shareableId: string;
 }
 
 declare interface getBanksProps {
@@ -329,6 +329,3 @@ declare interface getBankProps {
 declare interface getBankByAccountIdProps {
   accountId: string;
 }
-
-
-
