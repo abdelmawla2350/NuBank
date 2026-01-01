@@ -226,7 +226,7 @@ Banking-system/
 
 ## 🚀 Deployment
 
-## 🚀 Live Demo
+### 🚀 Live Demo
 👉 https://banking-system-theta-eight.vercel.app/sign-in
 
 ### Vercel (Recommended)
@@ -271,9 +271,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For support and questions:
-- Create an [issue](https://github.com/your-username/nu-bank/issues)
-- Email: support@nubank.com
-- Documentation: [docs.nubank.com](https://docs.nubank.com)
+- Create an [issue](https://github.com/abdelmawla2350/NuBank)
+- Email: a.mohamed2350@nu.edu.eg
+- Documentation: NU Bank Final Repo.pdf
 
 ---
 
