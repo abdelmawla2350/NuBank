@@ -268,6 +268,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Next.js](https://nextjs.org/) team for the amazing framework
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
 
+### 🛠️ NuBank Team:
+
+- Abdelmawla Mohamed
+- Malak Abdelhamid
+- Sara Mohamed
+- Mariam Shahinn
+ 
 ## 📞 Support
 
 For support and questions:
